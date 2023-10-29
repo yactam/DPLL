@@ -61,11 +61,12 @@ clause unitaire trouvé
    utilisées dans votre implémentation de la fonction `pur`.
 
 La fonction pur transforme d'abord l'ensemble des clauses vers une liste de 
-littéral avec List.flatten après elle parcourt cette liste en maintenant une
-liste des littéraux deja-vus et pour chaque littéral elle teste si sa négation
-se trouve dans le reste des littéraux ou dans la liste des littéraux deja-vus 
-si c'est la cas alors ce littéral n'est pas pur et elle continue avec le 
-littéral suivant.
+littéral avec List.flatten après elle parcourt cette liste en maintenant un 
+ensemble des littéraux deja-vus et un ensemble des littéraux qu'on sait qu'ils 
+ne sont pas pur et pour chaque littéral elle teste si on sait est-ce qu'il est 
+non_pur puis si sa négation se trouve dans le reste des littéraux ou dans 
+l'ensemble des littéraux deja-vus si c'est la cas alors ce littéral n'est pas 
+pur et elle continue avec le littéral suivant.
 
 ---
 
@@ -75,7 +76,8 @@ littéral suivant.
 
 Le solveur_split fait une recherche par énumeration de tout les cas possibles
 sans utiliser les régles unitaire et pur donc prends plus de temps que le 
-solveur_dpll_rec
+solveur_dpll_rec, pour la formule φ = (p∨r)∧(¬p)∧(¬q∨r) les deux solveurs 
+auront des comportements différents
 
 ---
 
@@ -87,6 +89,12 @@ dont on a expliqué le code avec des commentaires et on a trouvé aussi qu'on
 peut utiliser le backtracking non-chronologique pour améliorer l'efficacité 
 du branchement mais c'est un algorithme basé sur le DPLL qui s'appelle CDCL 
 qui marcherait sur des examples bien complexes comme sudoku-9x9-god.cnf
+
+On a aussi écrit un script avec python qui teste si l'intérprétation 
+donnée par notre solveur_dpll_rec satisfait vraiment la CNF en format
+DIMACS, exemple d'utilisation:
+./dpll tictactoe.cnf > tictactoe.interp 
+python check.py tictactoe.cnf tictactoe.interp
 
 ---
 
