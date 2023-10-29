@@ -8,9 +8,9 @@ Date limite: 3 novembre 2023, 23h59
 
 Identité
 --------
-Nombre de binôme: **à remplir**
-Nom, prénom 1: **à remplir**
-Nom, prénom 2: **à remplir**
+Nombre de binôme: 66
+Nom, prénom 1: TAMDRARI, Yacine
+Nom, prénom 2: LECONTE, Yohan
 
 
 Questions sur votre code
@@ -19,7 +19,7 @@ Questions sur votre code
    et que ensuite `./dpll sudoku-4x4.cnf` donne la réponse attendue (voir
    fichier README) ?
 
-**à remplir**
+Oui la compilation et l'exécution du programme sur sudoku-4x4.cnf réussit
 
 ---
 
@@ -30,7 +30,11 @@ Questions sur votre code
    - Si non, expliquez en quelques phrases en français comment
      fonctionne votre implémentation de `simplifie`.
 
-**à remplir**
+Oui la fonction filter_map est utilisée dans la fonction simplifie d'une part
+pour supprimer les clauses qui ont le littéral avec lequel on simplifie les 
+clauses et d'autres part pour supprimer la négation de ce littéral dans chaque
+clause, pour plus de details veuillez voir les commentaires dans le fichier
+dpll.ml
 
 ---
 
@@ -43,7 +47,11 @@ Questions sur votre code
    comment ces fonctions auxiliaires sont utilisées dans votre
    implémentation de la fonction `unitaire`.
 
-**à remplir**
+Pour la fonction unitaire on a utilisé la fonction find du module List pour
+trouver une clause de taille 1 (avec la fonction List.length) dans l'ensemble
+des clauses qui lève une exception 'Not_found' si aucune clause unitaire existe
+et on a utilisé la fonction List.hd pour récupérer le seul littéral de la 
+clause unitaire trouvé
 
 ---
 
@@ -52,7 +60,12 @@ Questions sur votre code
    quelques phrases en français comment ces fonctions auxiliaires sont
    utilisées dans votre implémentation de la fonction `pur`.
 
-**à remplir**
+La fonction pur transforme d'abord l'ensemble des clauses vers une liste de 
+littéral avec List.flatten après elle parcourt cette liste en maintenant une
+liste des littéraux deja-vus et pour chaque littéral elle teste si sa négation
+se trouve dans le reste des littéraux ou dans la liste des littéraux deja-vus 
+si c'est la cas alors ce littéral n'est pas pur et elle continue avec le 
+littéral suivant.
 
 ---
 
@@ -60,13 +73,20 @@ Questions sur votre code
    `solveur_split` et `solveur_dpll_rec` ont un comportement
    différent, et expliquez les différences entre ces deux fonctions.
 
-**à remplir**
+Le solveur_split fait une recherche par énumeration de tout les cas possibles
+sans utiliser les régles unitaire et pur donc prends plus de temps que le 
+solveur_dpll_rec
 
 ---
 
 5. Avez-vous d'autres remarques sur votre rendu ? (question optionnelle)
 
-**à remplir**
+On a essayé d'améliorer le DPLL récursif dans le choix de branchement en 
+utilisant l'heuristique MOMS (Maximum Occurrences in clauses of Minimum Size)
+dont on a expliqué le code avec des commentaires et on a trouvé aussi qu'on 
+peut utiliser le backtracking non-chronologique pour améliorer l'efficacité 
+du branchement mais c'est un algorithme basé sur le DPLL qui s'appelle CDCL 
+qui marcherait sur des examples bien complexes comme sudoku-9x9-god.cnf
 
 ---
 
