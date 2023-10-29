@@ -106,7 +106,11 @@ let pur clauses =
       le littéral de cette clause unitaire ;
     - sinon, lève une exception `Not_found' *)
 let unitaire clauses =
-  hd (find (fun c -> length c = 1) clauses) 
+  hd (
+    find (fun c -> (* pour chaque clause *) 
+      length c = 1) (* trouver une de taille 1 *) 
+    clauses
+    ) (* renvoyer le seul élément de cette clause *)
 
 let moms clauses =
   if clauses = [] then failwith "Empty formula" 
@@ -146,26 +150,30 @@ let moms clauses =
 (* solveur_dpll_rec : int list list -> int list -> int list option *)
 let rec solveur_dpll_rec clauses interpretation =
   match clauses with
-  | [] -> Some(interpretation)
+  | [] -> Some(interpretation)(* si l'ensemble des clauses est vide alors la formules est SAT *)
   | _  -> 
-      if mem [] clauses 
+      if mem [] clauses (* si la formule contient l'ensemble vide alors elle UNSAT *)
       then None 
       else 
         try
-          let unitaire = unitaire clauses in 
-          solveur_dpll_rec (simplifie unitaire clauses) (unitaire::interpretation)
+          let unitaire = unitaire clauses in (* on cherche une clause unitaire dans clauses *)
+          solveur_dpll_rec (simplifie unitaire clauses) (unitaire::interpretation) 
+          (* si on trouve une clause unitaire on simplifie par le littéral de cette dernière *)
         with
-        | Not_found ->
+        | Not_found -> 
             try
-              let pur = pur clauses in 
+              let pur = pur clauses in (* sinon on essaie de trouver un littéral pur *) 
               solveur_dpll_rec (simplifie pur clauses) (pur::interpretation)
+              (* si c'est le cas on simplifie par ce littéral *)
             with
             | Failure _ -> 
-                let l = moms clauses in
+                let l = moms clauses in 
+                (* sinon on utilise l'heuristique MOMS pour trouver un littéral pour l'embranchement *)
                 let branche = solveur_dpll_rec (simplifie l clauses) (l::interpretation) in
                 match branche with
                 | None -> solveur_dpll_rec (simplifie (-l) clauses) ((-l)::interpretation)
-                | _    -> branche
+                (* si l ne réussit pas on backtrack et on essaie avec ¬l *)
+                | _    -> branche (* sinon on renvoie None car clauses est UNSAT *)
 
 
 (* tests *)
