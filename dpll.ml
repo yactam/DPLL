@@ -51,8 +51,12 @@ let coloriage = [
    applique la simplification de l'ensemble des clauses en mettant
    le littéral l à vrai *)
 let simplifie l clauses =
-  (* à compléter *)
-  []
+  filter_map (fun c -> (* pour chaque clause *)
+    if mem l c (* si l ∈ c *)                 
+    then None (* on supprime la clause *)
+    else Some ( (* sinon on supprime juste le litral ¬l dans la clause *)
+      filter_map (fun l' -> if l' = -l then None else Some(l')) c)
+  ) clauses
 
 (* solveur_split : int list list -> int list -> int list option
    exemple d'utilisation de `simplifie' *)
@@ -82,21 +86,86 @@ let rec solveur_split clauses interpretation =
       ce littéral ;
     - sinon, lève une exception `Failure "pas de littéral pur"' *)
 let pur clauses =
-  (* à compléter *)
-  0
+  let module SL = Set.Make(Int) in 
+  let rec pur_aux cf vus non_purs =
+    match cf with
+    | []   -> failwith "pas de littéral pur"
+    | l::x ->
+        (* si l est dans l'ensemble des non purs ou ¬l apparait dans x ou 
+           non_vus alors il n'est pas pur *)
+        if (SL.mem (abs l) non_purs || SL.mem (-l) vus || mem (-l) x)
+        (* on cherche un littéral pur dans le reste des littéraux en ajoutant
+         l aux littéraux non_purs et les littéreux déja vus  *)
+        then pur_aux x (SL.add l vus) (SL.add (abs l) non_purs)
+        (* sinon l est pur *)
+        else l 
+  in pur_aux (List.flatten clauses) (SL.empty) (SL.empty) 
 
 (* unitaire : int list list -> int
     - si `clauses' contient au moins une clause unitaire, retourne
       le littéral de cette clause unitaire ;
     - sinon, lève une exception `Not_found' *)
 let unitaire clauses =
-  (* à compléter *)
-  0
+  hd (find (fun c -> length c = 1) clauses) 
+
+let moms clauses =
+  if clauses = [] then failwith "Empty formula" 
+  (* si l'ensemble des clauses est vide alors on ne peut pas brancher sur un 
+     litéral *)
+  else
+    let moms = Hashtbl.create 10 in 
+    (* on créé une table de hashage pour stocker chaque literal et son nombre 
+       d'occurrence *)
+    let min_len = ref (length (hd clauses)) in 
+    (* on initialise la taille minimale des clauses à la taille de la première clause *) 
+    let max_lit = ref 0 in 
+    (* et le literal qui a le maximum de nombre d'occurrence dans ses clauses 
+       minimales à 0 *)
+
+    iter (fun c -> min_len := min !min_len (length c)) clauses; 
+    (* on cherche la taille minimale des clauses *)
+
+    iter(fun c-> (* pour chaque clause *)
+      if length c = !min_len then  (* si sa taille est minimale *)
+        iter (fun l -> (* pour chaque literal dans la clause c *)
+          let count = Hashtbl.find_opt moms (abs l) |> Option.value ~default:0 in 
+          (* on récupère son nombre d'occurrence (0 si c'est pour la première
+             fois) *) 
+          Hashtbl.replace moms (abs l) (count+1); 
+          (* on mis à jour ce nombre d'occurence *)
+          if !max_lit = 0 || (count + 1 > Hashtbl.find moms !max_lit) then 
+            (* si ce nombre d'occurrence est plus grand que le maximum 
+               déja rencotré *)
+            max_lit := (abs l) 
+            (* on mis à jour le literal qui apparait avec un maximum de nombre d'occurrence *)
+        ) c 
+    ) clauses;
+
+    !max_lit
 
 (* solveur_dpll_rec : int list list -> int list -> int list option *)
 let rec solveur_dpll_rec clauses interpretation =
-  (* à compléter *)
-  None
+  match clauses with
+  | [] -> Some(interpretation)
+  | _  -> 
+      if mem [] clauses 
+      then None 
+      else 
+        try
+          let unitaire = unitaire clauses in 
+          solveur_dpll_rec (simplifie unitaire clauses) (unitaire::interpretation)
+        with
+        | Not_found ->
+            try
+              let pur = pur clauses in 
+              solveur_dpll_rec (simplifie pur clauses) (pur::interpretation)
+            with
+            | Failure _ -> 
+                let l = moms clauses in
+                let branche = solveur_dpll_rec (simplifie l clauses) (l::interpretation) in
+                match branche with
+                | None -> solveur_dpll_rec (simplifie (-l) clauses) ((-l)::interpretation)
+                | _    -> branche
 
 
 (* tests *)
