@@ -87,19 +87,18 @@ let rec solveur_split clauses interpretation =
     - sinon, lève une exception `Failure "pas de littéral pur"' *)
 let pur clauses =
   let module SL = Set.Make(Int) in 
-  let rec pur_aux cf vus non_purs =
+  let rec pur_aux cf non_purs =
     match cf with
     | []   -> failwith "pas de littéral pur"
     | l::x ->
-        (* si l est dans l'ensemble des non purs ou ¬l apparait dans x ou 
-           non_vus alors il n'est pas pur *)
-        if (SL.mem (abs l) non_purs || SL.mem (-l) vus || mem (-l) x)
+        (* si l est dans l'ensemble des non purs ou ¬l apparait dans x *)
+        if (SL.mem (abs l) non_purs || mem (-l) x)
         (* on cherche un littéral pur dans le reste des littéraux en ajoutant
-         l aux littéraux non_purs et les littéreux déja vus  *)
-        then pur_aux x (SL.add l vus) (SL.add (abs l) non_purs)
+         l aux littéraux non_purs *)
+        then pur_aux x (SL.add (abs l) non_purs)
         (* sinon l est pur *)
         else l 
-  in pur_aux (List.flatten clauses) (SL.empty) (SL.empty) 
+  in pur_aux (List.flatten clauses) (SL.empty)
 
 (* unitaire : int list list -> int
     - si `clauses' contient au moins une clause unitaire, retourne
@@ -112,18 +111,21 @@ let unitaire clauses =
     clauses
     ) (* renvoyer le seul élément de cette clause *)
 
+(* moms : int list list -> int 
+   renvoie un littéral parmi les littéraux de 'clauses', lève une exception 
+   `Failure "Empty formula"` si l'ensemble des clauses est vide *)
 let moms clauses =
   if clauses = [] then failwith "Empty formula" 
   (* si l'ensemble des clauses est vide alors on ne peut pas brancher sur un 
-     litéral *)
+     littéral *)
   else
     let moms = Hashtbl.create 10 in 
-    (* on créé une table de hashage pour stocker chaque literal et son nombre 
+    (* on créé une table de hashage pour stocker chaque littéral et son nombre 
        d'occurrence *)
     let min_len = ref (length (hd clauses)) in 
     (* on initialise la taille minimale des clauses à la taille de la première clause *) 
     let max_lit = ref 0 in 
-    (* et le literal qui a le maximum de nombre d'occurrence dans ses clauses 
+    (* et le littéral qui a le maximum de nombre d'occurrence dans ses clauses 
        minimales à 0 *)
 
     iter (fun c -> min_len := min !min_len (length c)) clauses; 
@@ -131,7 +133,7 @@ let moms clauses =
 
     iter(fun c-> (* pour chaque clause *)
       if length c = !min_len then  (* si sa taille est minimale *)
-        iter (fun l -> (* pour chaque literal dans la clause c *)
+        iter (fun l -> (* pour chaque littéral dans la clause c *)
           let count = Hashtbl.find_opt moms (abs l) |> Option.value ~default:0 in 
           (* on récupère son nombre d'occurrence (0 si c'est pour la première
              fois) *) 
@@ -141,7 +143,8 @@ let moms clauses =
             (* si ce nombre d'occurrence est plus grand que le maximum 
                déja rencotré *)
             max_lit := (abs l) 
-            (* on mis à jour le literal qui apparait avec un maximum de nombre d'occurrence *)
+            (* on mis à jour le littéral qui apparait avec un maximum de nombre
+               d'occurrence *)
         ) c 
     ) clauses;
 
