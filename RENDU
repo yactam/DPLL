@@ -51,7 +51,7 @@ Pour la fonction unitaire on a utilisé la fonction find du module List pour
 trouver une clause de taille 1 (avec la fonction List.length) dans l'ensemble
 des clauses qui lève une exception 'Not_found' si aucune clause unitaire existe
 et on a utilisé la fonction List.hd pour récupérer le seul littéral de la 
-clause unitaire trouvé
+clause unitaire trouvée
 
 ---
 
@@ -60,13 +60,12 @@ clause unitaire trouvé
    quelques phrases en français comment ces fonctions auxiliaires sont
    utilisées dans votre implémentation de la fonction `pur`.
 
-La fonction pur transforme d'abord l'ensemble des clauses vers une liste de 
-littéral avec List.flatten après elle parcourt cette liste en maintenant un 
-ensemble des littéraux deja-vus et un ensemble des littéraux qu'on sait qu'ils 
-ne sont pas pur et pour chaque littéral elle teste si on sait est-ce qu'il est 
-non_pur puis si sa négation se trouve dans le reste des littéraux ou dans 
-l'ensemble des littéraux deja-vus si c'est la cas alors ce littéral n'est pas 
-pur et elle continue avec le littéral suivant.
+La fonction pur transforme d'abord l'ensemble des clauses vers une liste de
+littéraux avec List.flatten après elle parcourt cette liste en maintenant un
+ensemble des littéraux qu'on sait qu'ils ne sont pas pur (initialement vide)
+et pour chaque littéral elle teste si on sait est-ce qu'il est non_pur ou
+si sa négation se trouve dans le reste des littéraux non déja parcourus si c'est
+la cas alors ce littéral n'est pas pur et elle continue avec le littéral suivant.
 
 ---
 
@@ -74,7 +73,7 @@ pur et elle continue avec le littéral suivant.
    `solveur_split` et `solveur_dpll_rec` ont un comportement
    différent, et expliquez les différences entre ces deux fonctions.
 
-Le solveur_split fait une recherche par énumeration de tout les cas possibles
+Le solveur_split fait une recherche par simplification (avec branchements)
 sans utiliser les régles unitaire et pur donc prends plus de temps que le 
 solveur_dpll_rec, pour la formule φ = (p∨r)∧(¬p)∧(¬q∨r) les deux solveurs 
 auront des comportements différents
@@ -83,11 +82,11 @@ auront des comportements différents
 
 5. Avez-vous d'autres remarques sur votre rendu ? (question optionnelle)
 
-On a essayé d'améliorer le DPLL récursif dans le choix de branchement en 
+On a essayé d'améliorer le DPLL récursif dans le choix de branchement en
 utilisant l'heuristique MOMS (Maximum Occurrences in clauses of Minimum Size)
 dont on a expliqué le code avec des commentaires et on a trouvé aussi qu'on 
 peut utiliser le backtracking non-chronologique pour améliorer l'efficacité 
-du branchement mais c'est un algorithme basé sur le DPLL qui s'appelle CDCL 
+du branchement mais c'est un algorithme hors le DPLL qui s'appelle CDCL 
 qui marcherait sur des examples bien complexes comme sudoku-9x9-god.cnf
 
 On a aussi écrit un script avec python qui teste si l'intérprétation 
@@ -95,6 +94,7 @@ donnée par notre solveur_dpll_rec satisfait vraiment la CNF en format
 DIMACS, exemple d'utilisation:
 ./dpll tictactoe.cnf > tictactoe.interp 
 python check.py tictactoe.cnf tictactoe.interp
+puis affiche si l'interpretation satisfait la CNF ou pas.
 
 ---
 
